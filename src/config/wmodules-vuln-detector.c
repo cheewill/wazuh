@@ -55,6 +55,7 @@ static void wm_vuldet_remove_os_feed(vu_os_feed *feed, char full_r);
 static void wm_vuldet_remove_os_feed_list(vu_os_feed *feeds);
 static void wm_vuldet_init_provider_options(provider_options *options);
 static void wm_vuldet_clear_provider_options(provider_options options);
+static void wm_vuldet_enable_debian_json_feed(update_node **updates);
 
 // Options
 static const char *XML_DISABLED = "disabled";
@@ -196,6 +197,12 @@ int wm_vuldet_set_feed_version(char *feed, char *version, update_node **upd_list
             goto end;
         }
         upd->dist_ref = FEED_DEBIAN;
+    } else if (strcasestr(feed, vu_feed_tag[FEED_JDEBIAN])) {
+        // JSON REDHAT
+        os_index = CVE_JDEBIAN;
+        upd->dist_tag_ref = FEED_JDEBIAN;
+        upd->dist_ext = vu_feed_ext[FEED_JDEBIAN];
+        upd->dist_ref = FEED_JDEBIAN;
     } else if (strcasestr(feed, vu_feed_tag[FEED_REDHAT])) {
         static char rh_dep_adv = 0;
 
@@ -403,6 +410,8 @@ int Read_Vuln(const OS_XML *xml, xml_node **nodes, void *d1, char d2) {
             return OS_INVALID;
         }
     }
+
+    wm_vuldet_enable_debian_json_feed(updates);
 
     vuldet->flags.update = vuldet->flags.update | run_update;
 
@@ -670,13 +679,6 @@ int wm_vuldet_read_provider(const OS_XML *xml, xml_node *node, update_node **upd
             updates[os_index]->path = os_list->path;
             updates[os_index]->port = os_list->port;
 
-            if (updates[os_index]->dist_ref == FEED_DEBIAN && (p_options.multi_path || p_options.multi_url)) {
-                updates[os_index]->multi_path = p_options.multi_path;
-                updates[os_index]->multi_url = p_options.multi_url;
-                p_options.multi_path = NULL;
-                p_options.multi_url = NULL;
-            }
-
             if (os_list->allow && wm_vuldet_add_allow_os(updates[os_index], os_list->allow, 0)) {
                 wm_vuldet_remove_os_feed(rem, 0);
                 return OS_INVALID;
@@ -694,14 +696,14 @@ int wm_vuldet_read_provider(const OS_XML *xml, xml_node *node, update_node **upd
             if (updates[os_index]->path && updates[os_index]->url) {
                 os_free(updates[os_index]->url);
             }
-            if (updates[os_index]->multi_path && updates[os_index]->multi_url) {
-                os_free(updates[os_index]->multi_url);
-            }
 
             os_list = os_list->next;
             wm_vuldet_remove_os_feed(rem, 0);
         }
-    } else {
+
+    } if (multi_provider || p_options.multi_path || p_options.multi_url) {
+        pr_name = (strcasestr(pr_name, "debian")) ? "jdebian" : pr_name;
+
         if (os_index = wm_vuldet_set_feed_version(pr_name, NULL, updates), os_index == OS_INVALID || os_index == OS_SUPP_SIZE) {
             goto end;
         }
@@ -1054,7 +1056,7 @@ int wm_vuldet_read_provider_content(xml_node **node, char *name, char multi_prov
                 mwarn("'%s' option can only be used in a multi-provider.", node[i]->element);
             }
         } else if (!strcmp(node[i]->element, XML_ALLOW)) {
-            if (multi_provider) {
+            if (multi_provider || debian_enabled) {
                 if (!node[i]->attributes || !*node[i]->attributes || strcmp(*node[i]->attributes, XML_REPLACED_OS) ||
                     !node[i]->values || !*node[i]->values || !**node[i]->values) {
                     merror("Invalid '%s' value.", XML_REPLACED_OS);
@@ -1131,6 +1133,24 @@ void wm_vuldet_clear_provider_options(provider_options options) {
     w_FreeArray(options.multi_allowed_os_ver);
     os_free(options.multi_allowed_os_name);
     os_free(options.multi_allowed_os_ver);
+}
+
+void wm_vuldet_enable_debian_json_feed(update_node **updates) {
+    int8_t debian_enabled = 0;
+    int i;
+
+    // Search for any enabled rhel feed
+    for (i = 0; i <= CVE_JDEBIAN; i++) {
+        if (updates[i] && updates[i]->dist_ref == FEED_DEBIAN) {
+            debian_enabled = i;
+            break;
+        }
+    }
+
+    if (!debian_enabled)
+        return;
+
+    wm_vuldet_set_feed_version("jdebian", NULL, updates);
 }
 
 #endif
