@@ -53,7 +53,8 @@
 
 /** Prototypes **/
 void OS_ReadMSG(int m_queue);
-RuleInfo *OS_CheckIfRuleMatch(Eventinfo *lf, RuleNode *curr_node, regex_matching *rule_match);
+RuleInfo *OS_CheckIfRuleMatch(Eventinfo *lf, RuleNode *curr_node, regex_matching *rule_match,
+                              OSList **fts_list, OSHash **fts_store);
 static void LoopRule(RuleNode *curr_node, FILE *flog);
 
 /* For decoders */
@@ -894,9 +895,11 @@ void OS_ReadMSG_analysisd(int m_queue)
     num_dispatch_dbsync_threads = (num_dispatch_dbsync_threads > 0) ? num_dispatch_dbsync_threads : cpu_cores;
 
     /* Initiate the FTS list */
-    if (!FTS_Init(num_rule_matching_threads)) {
+    if (!FTS_Init(num_rule_matching_threads, &os_analysisd_fts_list, &os_analysisd_fts_store)) {
         merror_exit(FTS_LIST_ERROR);
     }
+
+    mdebug1("FTSInit completed.");
 
     /* Create message handler thread */
     w_create_thread(ad_input_main, &m_queue);
@@ -975,8 +978,8 @@ void OS_ReadMSG_analysisd(int m_queue)
 }
 
 /* Checks if the current_rule matches the event information */
-RuleInfo *OS_CheckIfRuleMatch(Eventinfo *lf, RuleNode *curr_node, regex_matching *rule_match)
-{
+RuleInfo *OS_CheckIfRuleMatch(Eventinfo *lf, RuleNode *curr_node, regex_matching *rule_match,
+                              OSList **fts_list, OSHash **fts_store) {
     /* We check for:
      * decoded_as,
      * fts,
@@ -1317,7 +1320,7 @@ RuleInfo *OS_CheckIfRuleMatch(Eventinfo *lf, RuleNode *curr_node, regex_matching
             char * _line_cpy;
             if ((lf->decoder_info->fts & FTS_DONE) || (lf->rootcheck_fts & FTS_DONE))  {
                 /* We already did the fts in here */
-            } else if (_line = FTS(lf),_line == NULL) {
+            } else if (_line = FTS(lf, fts_list, fts_store),_line == NULL) {
                 return (NULL);
             }
 
@@ -1508,7 +1511,7 @@ RuleInfo *OS_CheckIfRuleMatch(Eventinfo *lf, RuleNode *curr_node, regex_matching
 #endif
 
         while (child_node) {
-            child_rule = OS_CheckIfRuleMatch(lf, child_node, rule_match);
+            child_rule = OS_CheckIfRuleMatch(lf, child_node, rule_match, &os_analysisd_fts_list, &os_analysisd_fts_store);
             if (child_rule != NULL) {
                 if (!child_rule->prev_rule) {
                     child_rule->prev_rule = rule;
@@ -2452,8 +2455,8 @@ void * w_process_event_thread(__attribute__((unused)) void * id){
             }
 
             /* Check each rule */
-            else if ((t_currently_rule = OS_CheckIfRuleMatch(lf, rulenode_pt, &rule_match))
-                        == NULL) {
+            else if (t_currently_rule = OS_CheckIfRuleMatch(lf, rulenode_pt, &rule_match,
+                    &os_analysisd_fts_list, &os_analysisd_fts_store), t_currently_rule == NULL) {
                 continue;
             }
 
