@@ -420,7 +420,7 @@ void OS_ReadMSG(char *ut_str)
     mdebug1("FTSInit completed.");
 
     /* Initialize the Accumulator */
-    if (!Accumulate_Init()) {
+    if (!Accumulate_Init(&os_analysisd_acm_store, &os_analysisd_acm_lookups, &os_analysisd_acm_purge_ts)) {
         merror("accumulator: ERROR: Initialization failed");
         exit(1);
     }
@@ -494,7 +494,7 @@ void OS_ReadMSG(char *ut_str)
             /* Run accumulator */
             if ( lf->decoder_info->accumulate == 1 ) {
                 print_out("\n**ACCUMULATOR: LEVEL UP!!**\n");
-                lf = Accumulate(lf);
+                lf = Accumulate(lf, &os_analysisd_acm_store, &os_analysisd_acm_lookups, &os_analysisd_acm_purge_ts);
             }
 
             /* Loop over all the rules */
