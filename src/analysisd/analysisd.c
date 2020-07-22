@@ -56,7 +56,7 @@ void OS_ReadMSG(int m_queue);
 static void LoopRule(RuleNode *curr_node, FILE *flog);
 
 /* For decoders */
-void DecodeEvent(Eventinfo *lf, regex_matching *decoder_match, OSDecoderNode *node);
+void DecodeEvent(Eventinfo *lf, OSHash *rules_hash, regex_matching *decoder_match, OSDecoderNode *node);
 int DecodeSyscheck(Eventinfo *lf, _sdb *sdb);
 // Decode events in json format
 int decode_fim_event(_sdb *sdb, Eventinfo *lf);
@@ -2227,7 +2227,7 @@ void * w_decode_event_thread(__attribute__((unused)) void * args){
                 }
             } else {
                 node = OS_GetFirstOSDecoder(lf->program_name);
-                DecodeEvent(lf, &decoder_match, node);
+                DecodeEvent(lf, Config.g_rules_hash , &decoder_match, node);
             }
 
             free(msg);
