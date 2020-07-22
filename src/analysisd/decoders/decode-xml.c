@@ -272,7 +272,7 @@ int ReadDecodeXML(const char *file)
         /* Get decoder options */
         elements = OS_GetElementsbyNode(&xml, node[i]);
         if (elements == NULL) {
-            merror(XML_ELEMNULL);
+            str_error_append(&error_str, XML_ELEMNULL);
             goto cleanup;
         }
 
@@ -860,7 +860,7 @@ char *_loadmemory(char *at, char *str, char** error_str)
         }
         at = (char *) realloc(at, (finalsize + 1) * sizeof(char));
         if (at == NULL) {
-            merror(MEM_ERROR, errno, strerror(errno));
+            str_error_append(error_str, MEM_ERROR, errno, strerror(errno));
             return (NULL);
         }
         strncat(at, str, strsize);
