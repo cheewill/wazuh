@@ -150,7 +150,7 @@ static int ReadDecodeAttrs(char *const *names, char *const *values)
 @TODO Doc
 @TODO Add input 4 error msg 
 */
-int ReadDecodeXML(const char *file)
+int ReadDecodeXML(const char *file, char** out_msg)
 {
     OS_XML xml;
     XML_NODE node = NULL;
@@ -785,12 +785,12 @@ int ReadDecodeXML(const char *file)
     retval = 1;
 
 cleanup:
-/*
+
     if(error_str){
-        os_free(*input_arg);
-        *input_arg = error_str
+        os_free(*out_msg);
+        *out_msg = error_str;
     }
-*/
+
     os_free(p_name);
     os_free(prematch);
     os_free(regex);

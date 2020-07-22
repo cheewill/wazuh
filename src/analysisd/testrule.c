@@ -218,6 +218,9 @@ int main(int argc, char **argv)
             /* Initialize the decoders list */
             OS_CreateOSDecoderList();
 
+            /* Out msg */
+            char* deco_msg = NULL;
+
             if (!Config.decoders) {
                 /* Legacy loading */
                 /* Read decoders */
@@ -230,7 +233,7 @@ int main(int argc, char **argv)
                     if (!test_config) {
                         mdebug1("Reading decoder file %s.", *decodersfiles);
                     }
-                    if (!ReadDecodeXML(*decodersfiles)) {
+                    if (!ReadDecodeXML(*decodersfiles, &deco_msg)) {
                         merror_exit(CONFIG_ERROR, *decodersfiles);
                     }
 
@@ -240,7 +243,7 @@ int main(int argc, char **argv)
 
                 /* Read local ones */
 
-                c = ReadDecodeXML(XML_LDECODER);
+                c = ReadDecodeXML(XML_LDECODER, &deco_msg);
                 if (!c) {
                     if ((c != -2)) {
                         merror_exit(CONFIG_ERROR,  XML_LDECODER);
@@ -258,7 +261,7 @@ int main(int argc, char **argv)
                     if(!quiet) {
                         mdebug1("Reading decoder file %s.", *decodersfiles);
                     }
-                    if (!ReadDecodeXML(*decodersfiles)) {
+                    if (!ReadDecodeXML(*decodersfiles, &deco_msg)) {
                         merror_exit(CONFIG_ERROR, *decodersfiles);
                     }
 
@@ -266,6 +269,8 @@ int main(int argc, char **argv)
                     decodersfiles++;
                 }
             }
+
+            os_free(deco_msg);
 
             /* Load decoders */
             SetDecodeXML();
@@ -298,11 +303,13 @@ int main(int argc, char **argv)
 
             /* Read the rules */
             {
+                char*  out_msg = NULL;
                 char **rulesfiles;
                 rulesfiles = Config.includes;
                 while (rulesfiles && *rulesfiles) {
                     mdebug1("Reading rules file: '%s'", *rulesfiles);
-                    if (Rules_OP_ReadRules(*rulesfiles, &os_analysisd_rulelist, &os_analysisd_cdblists) < 0) {
+                    if (Rules_OP_ReadRules(*rulesfiles, &os_analysisd_rulelist, 
+                                &os_analysisd_cdblists, &out_msg) < 0) {
                         merror_exit(RULES_ERROR, *rulesfiles);
                     }
 
@@ -310,6 +317,7 @@ int main(int argc, char **argv)
                     rulesfiles++;
                 }
 
+                os_free(out_msg);
                 free(Config.includes);
                 Config.includes = NULL;
             }

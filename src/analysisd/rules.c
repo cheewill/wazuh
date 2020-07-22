@@ -49,7 +49,7 @@ void Rules_OP_CreateRules()
 /* Read the log rules */
 // TODO Doxygen
 // -1 meas error, and 0 file empty, 0 all ok
-int Rules_OP_ReadRules(const char *rulefile, RuleNode **r_node, ListNode **l_node)
+int Rules_OP_ReadRules(const char *rulefile, RuleNode **r_node, ListNode **l_node, char** out_msg)
 {
     OS_XML xml;
     XML_NODE node = NULL;
@@ -1822,13 +1822,11 @@ cleanup:
     if (retval) {
         free(config_ruleinfo);
     }
-
-    /*
+    
     if(error_str){
-        os_free(*input_arg);
-        *input_arg = error_str;
+        os_free(*out_msg);
+        *out_msg = error_str;
     }
-    */
 
     /* Clean global node */
     OS_ClearNode(node);

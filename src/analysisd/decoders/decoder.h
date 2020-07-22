@@ -93,6 +93,6 @@ void SyscollectorInit(void);
 void CiscatInit(void);
 void WinevtInit(void);
 void SecurityConfigurationAssessmentInit(void);
-int ReadDecodeXML(const char *file);
+int ReadDecodeXML(const char *file, char** out_msg);
 
 #endif /* DECODER_H */

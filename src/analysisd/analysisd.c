@@ -525,19 +525,23 @@ int main_analysisd(int argc, char **argv)
 
             /* New loaded based on file loaded (in ossec.conf or default) */
             {
+                /* Out msg */
+                char* deco_msg = NULL;
+
                 char **decodersfiles;
                 decodersfiles = Config.decoders;
                 while ( decodersfiles && *decodersfiles) {
                     if (!test_config) {
                         mdebug1("Reading decoder file %s.", *decodersfiles);
                     }
-                    if (!ReadDecodeXML(*decodersfiles)) {
+                    if (!ReadDecodeXML(*decodersfiles, &deco_msg)) {
                         merror_exit(CONFIG_ERROR, *decodersfiles);
                     }
 
                     free(*decodersfiles);
                     decodersfiles++;
                 }
+                os_free(deco_msg);
             }
 
             /* Load decoders */
@@ -579,20 +583,22 @@ int main_analysisd(int argc, char **argv)
 
             /* Read the rules */
             {
+                char* out_msg = NULL;
                 char **rulesfiles;
                 rulesfiles = Config.includes;
                 while (rulesfiles && *rulesfiles) {
                     if (!test_config) {
                         mdebug1("Reading rules file: '%s'", *rulesfiles);
                     }
-                    if (Rules_OP_ReadRules(*rulesfiles, &os_analysisd_rulelist, &os_analysisd_cdblists) < 0) {
+                    if (Rules_OP_ReadRules(*rulesfiles, &os_analysisd_rulelist, 
+                            &os_analysisd_cdblists, &out_msg) < 0) {
                         merror_exit(RULES_ERROR, *rulesfiles);
                     }
 
                     free(*rulesfiles);
                     rulesfiles++;
                 }
-
+                os_free(out_msg);
                 free(Config.includes);
                 Config.includes = NULL;
             }
