@@ -98,3 +98,12 @@ void w_logtest_remove_session(int token);
  * for more than 15 minutes, remove it.
  */
 void w_logtest_check_active_sessions();
+
+/**
+ * @brief Initialize FTS engine for a client session
+ *
+ * @param fts_list list which save fts previous events
+ * @param fts_store hash table which save fts values processed previously
+ * @return 1 on success, otherwise return 0
+ */
+int w_logtest_fts_init(OSList **fts_list, OSHash **fts_store);

@@ -58,7 +58,7 @@ void AddtoIGnore(Eventinfo *lf, int pos);
  *
  * @param lf Event to check if must be ignored
  * @param pos Position of ignore file in fp_ignore
- * @return if must be ignored return 1,  otherwise return 0
+ * @return if must be ignored return 1, otherwise return 0
  */
 int IGnore(Eventinfo *lf, int pos);
 
@@ -67,7 +67,7 @@ int IGnore(Eventinfo *lf, int pos);
  *
  * @param lf Event to process
  * @param fts_list List which save fts previous events
- * @param fts_store Hash table which save fts values processed previously
+ * @param fts_store hash table which save fts values processed previously
  * @return Null if FTS is already present or in case of failure, otherwise return value
  */
 char * FTS(Eventinfo *lf, OSList **fts_list, OSHash **fts_store);

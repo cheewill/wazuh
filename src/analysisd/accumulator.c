@@ -242,7 +242,7 @@ void Accumulate_CleanUp(OSHash **acm_store, int *acm_lookups, time_t *acm_purge_
     unsigned int ti;
 
     /* Keep track of how many times we're called */
-    *acm_lookups++;
+    acm_lookups[0]++;
 
     gettimeofday(&tp, NULL);
     current_ts = tp.tv_sec;

@@ -22,7 +22,7 @@
 OSHash *os_analysisd_acm_store;
 
 /**
- * @brief Counter of the number of times purge
+ * @brief Counter of the number of times purged
  *
  * Only for Analysisd use
  */
@@ -38,8 +38,9 @@ time_t os_analysisd_acm_purge_ts;
 /**
  * @brief Initialize accumulator engine
  *
- * @param acm_store
- * @param acm_purge_ts
+ * @param acm_store Hash where save data which have same ID
+ * @param acm_lookups counter of the number of times purged
+ * @param acm_purge_ts counter of interval time since the last purge
  * @return 1 on succes, otherwise 0
  */
 int Accumulate_Init(OSHash **acm_store, int *acm_lookups, time_t *acm_purge_ts);
@@ -49,8 +50,8 @@ int Accumulate_Init(OSHash **acm_store, int *acm_lookups, time_t *acm_purge_ts);
  *
  * @param lf EventInfo to proccess
  * @param acm_store Hash where save data which have same ID
- * @param acm_lookups
- * @param acm_purge_ts
+ * @param acm_lookups counter of the number of times purged
+ * @param acm_purge_ts counter of interval time since the last purge
  * @return EventInfo passed from input
  */
 Eventinfo *Accumulate(Eventinfo *lf, OSHash **acm_store, int *acm_lookups, time_t *acm_purge_ts);
@@ -58,9 +59,9 @@ Eventinfo *Accumulate(Eventinfo *lf, OSHash **acm_store, int *acm_lookups, time_
 /**
  * @brief Purge the cache as needed
  *
- * @param acm_store
- * @param acm_lookups
- * @param acm_purge_ts
+ * @param acm_store hash where save data which have same id
+ * @param acm_lookups counter of the number of times purged
+ * @param acm_purge_ts counter of interval time since the last purge
  */
 void Accumulate_CleanUp(OSHash **acm_store, int *acm_lookups, time_t *acm_purge_ts);
 
