@@ -50,6 +50,8 @@ class LocalServerHandler(server.AbstractServerHandler):
         elif command == b'send_file':
             path, node_name = data.decode().split(' ')
             return self.send_file_request(path, node_name)
+        elif command == b'send_sync':
+            return self.send_sync(data)
         else:
             return super().process_request(command, data)
 
@@ -107,6 +109,17 @@ class LocalServerHandler(server.AbstractServerHandler):
             exc = future.exception()
             if exc:
                 self.logger.error(exc)
+
+    def send_sync(self, payload):
+        req = asyncio.create_task(self.execute(command=b'dapi', data=payload, wait_for_complete=False))
+        req.add_done_callback(functools.partial(self.get_send_sync_response, self.name))
+
+        return None, None
+    
+    def get_send_sync_response(self, name, future):
+        result = future.result()
+        msg_counter = self.next_counter()
+        self.server.clients[name].push(self.msg_build(b'send_sync', msg_counter, result.encode()))
 
 
 class LocalServer(server.AbstractServer):
