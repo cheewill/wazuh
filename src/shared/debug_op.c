@@ -338,24 +338,27 @@ void _merror(const char * file, int line, const char * func, const char *msg, ..
     va_end(args);
 }
 
-// Documentar, LEVEL is necessary??
 char* _str_error(const char * file, int line, const char * func, const char *format, ...)
 {
     va_list args;
     char* str = NULL;
+    os_malloc(OS_BUFFER_SIZE, str);
+    str[0] = '\0';
     
+
     if (isDebug())
     {
-        os_malloc(OS_BUFFER_SIZE, str);
-        va_start(args, format);
-
         (void) snprintf(str, OS_BUFFER_SIZE, "%s:%d at %s(): ERROR: ", file, line, func);
-        (void) vsnprintf(str + strlen(str), OS_BUFFER_SIZE - strlen(str), format, args);
-        (void) snprintf(str + strlen(str), OS_BUFFER_SIZE - strlen(str), "\n");
-
-        va_end(args);
-        os_realloc(str, strlen(str) + 1, str);
+    } else
+    {
+        (void) snprintf(str, OS_BUFFER_SIZE, "ERROR: ");
     }
+    va_start(args, format);
+    (void) vsnprintf(str + strlen(str), OS_BUFFER_SIZE - strlen(str), format, args);
+    (void) snprintf(str + strlen(str), OS_BUFFER_SIZE - strlen(str), "\n");
+    va_end(args);
+    
+    os_realloc(str, strlen(str) + 1, str);
     
     return str;
     
@@ -367,15 +370,50 @@ void _str_error_append(const char * file, int line, const char * func, char** ms
     va_list args;
     char* new_msg;
 
+    va_start(args, format);
+    new_msg = _str_error(file, line, func, format, args);
+    va_end(args);
+    wm_strcat(msg, new_msg, 0);
+    os_free(new_msg);
+    
+};
+
+char* _str_warn(const char * file, int line, const char * func, const char *format, ...)
+{
+    va_list args;
+    char* str = NULL;
+    os_malloc(OS_BUFFER_SIZE, str);
+    str[0] = '\0';
+    
     if(isDebug()){
-        va_start(args, format);
-        new_msg = _str_error(file, line, func, format, args);
-        va_end(args);
-        wm_strcat(msg, new_msg, 0);
-        os_free(new_msg);
+        (void) snprintf(str, OS_BUFFER_SIZE, "%s:%d at %s(): WARNING: ", file, line, func);
+    }else
+    {
+        (void) snprintf(str, OS_BUFFER_SIZE, "WARNING: ");
     }
 
+    va_start(args, format);
+    (void) vsnprintf(str + strlen(str), OS_BUFFER_SIZE - strlen(str), format, args);
+    (void) snprintf(str + strlen(str), OS_BUFFER_SIZE - strlen(str), "\n");
+    va_end(args);
+
+    os_realloc(str, strlen(str) + 1, str);
+
+    return str;
+}
+
+// *msg -> should have been assigned with the malloc family
+// if *msg==NULL wm_strcat alloc the memory
+void _str_warn_append(const char * file, int line, const char * func, char** msg, const char *format, ...)
+{
+    va_list args;
+    char* new_msg;
     
+    va_start(args, format);
+    new_msg = _str_warn(file, line, func, format, args);
+    va_end(args);
+    wm_strcat(msg, new_msg, 0);
+    os_free(new_msg); 
 };
 
 void _mterror(const char *tag, const char * file, int line, const char * func, const char *msg, ...)

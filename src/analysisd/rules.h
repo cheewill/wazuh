@@ -212,7 +212,7 @@ typedef struct _RuleNode {
 
 
 RuleInfoDetail *zeroinfodetails(int type, const char *data);
-int get_info_attributes(char **attributes, char **values);
+int get_info_attributes(char **attributes, char **values, char** error_str);
 
 /* RuleInfo functions */
 RuleInfo *zerorulemember(int id,

@@ -47,6 +47,8 @@
 #define str_error_append(msg, format, ...) _str_error_append(__FILE__, __LINE__, __func__, msg, format, ##__VA_ARGS__)
 #define mwarn(msg, ...) _mwarn(__FILE__, __LINE__, __func__, msg, ##__VA_ARGS__)
 #define mtwarn(tag, msg, ...) _mtwarn(tag, __FILE__, __LINE__, __func__, msg, ##__VA_ARGS__)
+#define str_warn(format, ...) _str_warn(__FILE__, __LINE__, __func__, format, ##__VA_ARGS__)
+#define str_warn_append(msg, format, ...) _str_warn_append(__FILE__, __LINE__, __func__, msg, format, ##__VA_ARGS__)
 #define minfo(msg, ...) _minfo(__FILE__, __LINE__, __func__, msg, ##__VA_ARGS__)
 #define mtinfo(tag, msg, ...) _mtinfo(tag, __FILE__, __LINE__, __func__, msg, ##__VA_ARGS__)
 #define mferror(msg, ...) _mferror(__FILE__, __LINE__, __func__, msg, ##__VA_ARGS__)
@@ -61,6 +63,8 @@ void _mtdebug2(const char *tag, const char * file, int line, const char * func, 
 void _merror(const char * file, int line, const char * func, const char *msg, ...) __attribute__((format(_PRINTF_FORMAT, 4, 5))) __attribute__((nonnull));
 char* _str_error(const char * file, int line, const char * func, const char *format, ...); // add __attribute__
 void _str_error_append(const char * file, int line, const char * func, char** msg, const char *format, ...); // add __attribute__
+char* _str_warn(const char * file, int line, const char * func, const char *format, ...); // add __attribute__
+void _str_warn_append(const char * file, int line, const char * func, char** msg, const char *format, ...); // add __attribute__
 void _mterror(const char *tag, const char * file, int line, const char * func, const char *msg, ...) __attribute__((format(_PRINTF_FORMAT, 5, 6))) __attribute__((nonnull));
 void _mwarn(const char * file, int line, const char * func, const char *msg, ...) __attribute__((format(_PRINTF_FORMAT, 4, 5))) __attribute__((nonnull));
 void _mtwarn(const char *tag, const char * file, int line, const char * func, const char *msg, ...) __attribute__((format(_PRINTF_FORMAT, 5, 6))) __attribute__((nonnull));

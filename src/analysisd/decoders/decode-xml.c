@@ -785,9 +785,12 @@ int ReadDecodeXML(const char *file)
     retval = 1;
 
 cleanup:
-    if(retval == 0){
-        os_free(error_str);
+/*
+    if(error_str){
+        os_free(*input_arg);
+        *input_arg = error_str
     }
+*/
     os_free(p_name);
     os_free(prematch);
     os_free(regex);
