@@ -27,6 +27,8 @@ struct{
 } flags;
 
 static void _log(int level, const char *tag, const char * file, int line, const char * func, const char *msg, va_list args) __attribute__((format(printf, 5, 0))) __attribute__((nonnull));
+static char* _str_error(const char * file, int line, const char * func, const char *format, va_list args) __attribute__((nonnull));
+static char* _str_warn(const char * file, int line, const char * func, const char *format, va_list args)  __attribute__((nonnull));
 
 #ifdef WIN32
 void WinSetError();
@@ -338,9 +340,8 @@ void _merror(const char * file, int line, const char * func, const char *msg, ..
     va_end(args);
 }
 
-char* _str_error(const char * file, int line, const char * func, const char *format, ...)
+static char* _str_error(const char * file, int line, const char * func, const char *format, va_list args)
 {
-    va_list args;
     char* str = NULL;
     os_malloc(OS_BUFFER_SIZE, str);
     str[0] = '\0';
@@ -353,18 +354,16 @@ char* _str_error(const char * file, int line, const char * func, const char *for
     {
         (void) snprintf(str, OS_BUFFER_SIZE, "ERROR: ");
     }
-    va_start(args, format);
+    
     (void) vsnprintf(str + strlen(str), OS_BUFFER_SIZE - strlen(str), format, args);
     (void) snprintf(str + strlen(str), OS_BUFFER_SIZE - strlen(str), "\n");
-    va_end(args);
     
     os_realloc(str, strlen(str) + 1, str);
     
     return str;
     
 }
-// *msg -> should have been assigned with the malloc family
-// if *msg==NULL wm_strcat alloc the memory
+
 void _str_error_append(const char * file, int line, const char * func, char** msg, const char *format, ...)
 {
     va_list args;
@@ -378,9 +377,8 @@ void _str_error_append(const char * file, int line, const char * func, char** ms
     
 };
 
-char* _str_warn(const char * file, int line, const char * func, const char *format, ...)
+static char* _str_warn(const char * file, int line, const char * func, const char *format, va_list args)
 {
-    va_list args;
     char* str = NULL;
     os_malloc(OS_BUFFER_SIZE, str);
     str[0] = '\0';
@@ -392,18 +390,14 @@ char* _str_warn(const char * file, int line, const char * func, const char *form
         (void) snprintf(str, OS_BUFFER_SIZE, "WARNING: ");
     }
 
-    va_start(args, format);
     (void) vsnprintf(str + strlen(str), OS_BUFFER_SIZE - strlen(str), format, args);
     (void) snprintf(str + strlen(str), OS_BUFFER_SIZE - strlen(str), "\n");
-    va_end(args);
 
     os_realloc(str, strlen(str) + 1, str);
 
     return str;
 }
 
-// *msg -> should have been assigned with the malloc family
-// if *msg==NULL wm_strcat alloc the memory
 void _str_warn_append(const char * file, int line, const char * func, char** msg, const char *format, ...)
 {
     va_list args;
