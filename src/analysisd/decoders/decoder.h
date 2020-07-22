@@ -18,6 +18,8 @@
 #define AFTER_PREMATCH  0x002   /* 2   */
 #define AFTER_PREVREGEX 0x004   /* 4   */
 #define AFTER_ERROR     0x010
+#define AFTER_ERR_VAL   (AFTER_ERROR << 1)
+#define AFTER_ERR_NAME  (AFTER_ERROR << 2)
 
 // JSON decoder flags
 // null treatment
@@ -79,7 +81,7 @@ typedef struct dbsync_context_t {
  * list and to get the first osdecoder
  */
 void OS_CreateOSDecoderList(void);
-int OS_AddOSDecoder(OSDecoderInfo *pi, OSDecoderNode **pn_osdecodernode, OSDecoderNode **npn_osdecodernode);
+int OS_AddOSDecoder(OSDecoderInfo *pi, OSDecoderNode **pn_osdecodernode, OSDecoderNode **npn_osdecodernode, char** error_str);
 OSDecoderNode *OS_GetFirstOSDecoder(const char *pname);
 int getDecoderfromlist(const char *name);
 char *GetGeoInfobyIP(char *ip_addr);

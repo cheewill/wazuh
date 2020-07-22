@@ -338,6 +338,46 @@ void _merror(const char * file, int line, const char * func, const char *msg, ..
     va_end(args);
 }
 
+// Documentar, LEVEL is necessary??
+char* _str_error(const char * file, int line, const char * func, const char *format, ...)
+{
+    va_list args;
+    char* str = NULL;
+    
+    if (isDebug())
+    {
+        os_malloc(OS_BUFFER_SIZE, str);
+        va_start(args, format);
+
+        (void) snprintf(str, OS_BUFFER_SIZE, "%s:%d at %s(): ERROR: ", file, line, func);
+        (void) vsnprintf(str + strlen(str), OS_BUFFER_SIZE - strlen(str), format, args);
+        (void) snprintf(str + strlen(str), OS_BUFFER_SIZE - strlen(str), "\n");
+
+        va_end(args);
+        os_realloc(str, strlen(str) + 1, str);
+    }
+    
+    return str;
+    
+}
+// *msg -> should have been assigned with the malloc family
+// if *msg==NULL wm_strcat alloc the memory
+void _str_error_append(const char * file, int line, const char * func, char** msg, const char *format, ...)
+{
+    va_list args;
+    char* new_msg;
+
+    if(isDebug()){
+        va_start(args, format);
+        new_msg = _str_error(file, line, func, format, args);
+        va_end(args);
+        wm_strcat(msg, new_msg, 0);
+        os_free(new_msg);
+    }
+
+    
+};
+
 void _mterror(const char *tag, const char * file, int line, const char * func, const char *msg, ...)
 {
     va_list args;
